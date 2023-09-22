@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 from itertools import cycle
 from colorama import Back, Fore, Style
 from TOKEN import TOKEN
-from config import PREFIX, color
+from config import PREFIX, color, devs
 
 intents = discord.Intents.all()
 intents.message_content = True
