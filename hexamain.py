@@ -1,7 +1,6 @@
-import discord
-import time
-import platform
-import asyncio
+import discord, time, platform, asyncio, os, TOKEN
+from discord import app_commands
+from discord.ext import commands, tasks
 from itertools import cycle
 from colorama import Back, Fore, Style
 from TOKEN import TOKEN
@@ -11,7 +10,7 @@ intents = discord.Intents.all()
 intents.message_content = True
 
 # Change prefix in config.py
-client = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None) # Help command is custom
+client = commands.Bot(command_prefix=PREFIX , intents=intents, help_command=None) # Help command is custom
 bot_status = cycle([f"Made by Trendsolate", "From The HEX Network", f"Ready to help '{PREFIX}'", "Reading a book", "Waiting for requests", "Playing Fortnite"])
 
 # Continuously changes presence activity every 30 seconds to the ones in bot_status
@@ -19,6 +18,7 @@ bot_status = cycle([f"Made by Trendsolate", "From The HEX Network", f"Ready to h
 async def change_status():
     await client.change_presence(activity=discord.Game(next(bot_status)))
 
+#
 @client.event
 async def on_ready():
     # this runs when the account is logged into.
@@ -28,8 +28,9 @@ async def on_ready():
     try:
         synced = await client.tree.sync()
         print(f"Synced {len(synced)} command(s)")
+
     except Exception as e:
-        print(e)
+        print(e) 
     client.add_view(Verification())
 
 # This is the code for commands
@@ -57,7 +58,7 @@ Bans specified user
 **{PREFIX}kick @user**
 Kicks specified user
 ''',
-        color=discord.Color(color)
+    color=discord.Color(color)
     )
     helpmenu.set_footer(text=f'Run by {ctx.author.name} | HexaBot')
     await ctx.send(embed=helpmenu)
@@ -68,12 +69,12 @@ async def ping(ctx):
     await asyncio.sleep(1)
     await og_msg.edit(content=f"Pong! {round(client.latency * 1000)}ms")
 
+
 # !! DO NOT TOUCH !! THIS IS CODE FOR VERIFICATION
 
 class Verification(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=None)
-
+        super().__init__(timeout = None)
     @discord.ui.button(label="Verify", custom_id="Verify", style=discord.ButtonStyle.success)
     async def verify(self, interaction, button):
         role = 1144021740331225098
@@ -87,7 +88,7 @@ async def verify_setup(ctx):
     embed = discord.Embed(
         title='Verification',
         description='Use the menu below to verify yourself to get access to the server! 👇✅',
-        color=discord.Color(color)
+    color=discord.Color(color)
     )
     embed.set_footer(text=f'{ctx.guild.name} • Verification')
 
@@ -109,7 +110,7 @@ async def ban(ctx, *args):
                     await member.ban()
                     embed = discord.Embed(
                         description=f"<@{user_id}> ({member.display_name}) has been **banned** from the server.",
-                        color=discord.Color(color)
+                    color=discord.Color(color)
                     )
                     embed.set_footer(text=f'Run by {ctx.author.name} | {footertext}')
                     await ctx.send(embed=embed)
@@ -139,7 +140,7 @@ async def kick(ctx, *args):
                     await member.kick()
                     embed = discord.Embed(
                         description=f"<@{user_id}> ({member.display_name}) has been **kicked** from the server.",
-                        color=discord.Color(color)
+                    color=discord.Color(color)
                     )
                     embed.set_footer(text=f'Run by {ctx.author.name} | {footertext}')
                     await ctx.send(embed=embed)
@@ -156,7 +157,7 @@ async def kick(ctx, *args):
 async def about(ctx):
     embed = discord.Embed(
         title="About the bot",
-        description=""" 
+        description="""
 All-in-one moderation and utilities bot. Invite me today to make your server safer.
 
 Important links:
@@ -178,11 +179,10 @@ Crystal
 ex6tic.js
 rahil_salecha
 """,
-        color=discord.Color(color)
+    color=discord.Color(color)
     )
     embed.set_footer(icon_url='https://i.imgur.com/i6gXIin.png', text="Made with Pycord")
     await ctx.send(embed=embed)
-
 # When person joins, do... (invite tracker)
 @client.event
 async def on_member_join(member):
