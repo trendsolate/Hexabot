@@ -9,3 +9,4 @@ devs = [
     1126175772546175036, # crystal
     587204069408636929, # exotic.js
 ]
+footertext = f'Hexabot - The HEX Network'
