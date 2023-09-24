@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 from itertools import cycle
 from colorama import Back, Fore, Style
 from TOKEN import TOKEN
-from config import PREFIX, color, footertext
+from config import PREFIX, color, footertext, devs, helpMenu
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -36,32 +36,25 @@ async def on_ready():
 # This is the code for commands
 @client.command()
 async def help(ctx):
-    helpmenu = discord.Embed(
-        title='Help Menu',
-        description=f'''
-```General```
-**{PREFIX}help**
-Returns help menu.
-
-**{PREFIX}ping**
-Returns client latency
-
-**{PREFIX}about**
-Returns information about the bot
-```Moderation and Administration```
-**{PREFIX}verify_setup**
-Sets up verification system
-
-**{PREFIX}ban @user**
-Bans specified user
-
-**{PREFIX}kick @user**
-Kicks specified user
-''',
-    color=discord.Color(color)
-    )
-    helpmenu.set_footer(text=f'Run by {ctx.author.name} | HexaBot')
-    await ctx.send(embed=helpmenu)
+    args = ctx.message.content.split()
+    if len(args) < 2:
+        await ctx.send('Specify a help menu category to view, `mod` for Moderation and Administration, or `gen` for General Commands or `utility` for Utility commands or`all` for All Commands.')
+    else:
+        menu = args[1]
+        if menu == 'all':
+            embed = discord.Embed(title='All commands', description=helpMenu.all, color=discord.Color(color))
+            await ctx.send(embed=embed)
+        elif menu == 'mod':
+            embed = discord.Embed(title='Moderation and Administration', description=helpMenu.mod, color=discord.Color(color))
+            await ctx.send(embed=embed)
+        elif menu == 'gen':
+            embed = discord.Embed(title='General', description=helpMenu.gen, color=discord.Color(color))
+            await ctx.send(embed=embed)
+        elif menu == 'utility':
+            embed = discord.Embed(title="Utility", description=helpMenu.utils, color=discord.Color(color))
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send('Invalid category.')
 
 @client.command()
 async def ping(ctx):
@@ -158,10 +151,10 @@ async def about(ctx):
     embed = discord.Embed(
         title="About the bot",
         description="""
-All-in-one moderation and utilities bot. Invite me today to make your server safer.
+I'm Hexa, Your All-in-one moderator bot, I'll keep your server clean of spammers and make sure people follow the rules.
 
 Important links:
-[Invite link](<https://pornhub.com>)
+[Invite link](<https://discord.gg/6g6862qDnn>)
 [Bot website](<https://pornhub.com>)
 
 Developers:
@@ -178,11 +171,112 @@ Bunkiyiester
 Crystal
 ex6tic.js
 rahil_salecha
+
+**Made by the HEX Network**
 """,
     color=discord.Color(color)
     )
     embed.set_footer(icon_url='https://i.imgur.com/i6gXIin.png', text="Made with Pycord")
     await ctx.send(embed=embed)
+
+@client.command()
+async def purge(ctx):
+    if len(ctx.message.content.split()) < 2:
+        await ctx.send('Specify an amount of messages to purge.')
+    else:
+        args = ctx.message.content.split()
+        amount = args[1]
+        if int(amount) < int(-1):
+            await ctx.send("Specify a valid amount of messages to delete.")
+            return
+        elif int(amount) > 500:
+            await ctx.send(f"{amount} is greater than the limit of 500.")
+        else:
+            if ctx.author.guild_permissions.manage_messages:
+                try:
+                    amount = int(amount)
+                    await ctx.channel.purge(limit=amount + 1)
+                    await ctx.send(f"Purged {amount} messages", delete_after=1)
+                except discord.errors.Forbidden:
+                    await ctx.send('Error occurred and the command could not be executed.')
+            else:
+                await ctx.send("You do not have the `manage_messages` permission required to run this command.")
+                return
+
+@client.command()
+async def eval(ctx):
+    if ctx.author.id not in devs:
+        await ctx.send("Developer command only")
+        return
+    else:
+        evalCMD = ctx.message.content[len(f"{PREFIX}eval "):]
+        if evalCMD == '':
+            await ctx.send("add some code bro")
+            return
+        else:
+            try:
+                result = exec(evalCMD)
+                embed = discord.Embed(
+                    title="Result of code",
+                    description=f'```\n{result}\n```',
+                color=discord.Color(color)
+                )
+                await ctx.send(embed=embed)
+            except Exception as e:
+                await ctx.send(f'An error occurred {e}')
+
+@client.command()
+async def serverinfo(ctx):
+        guild = ctx.guild
+        # Gets emojis as formatted
+        emojis = ", ".join([str(emoji) for emoji in guild.emojis])
+
+        # Gets roles as formatted
+        roles = ", ".join([role.mention for role in guild.roles])
+        embed = discord.Embed(
+            title="Server Information",
+            description=f"""
+```Main Info```
+Guild is {guild}
+Server ID - {guild.id}
+Server Name - {guild.name}
+Server Description - {guild.description}
+```Other```
+Server Member Count - {str(guild.member_count)}
+Server Boost Count - {int(guild.premium_subscription_count)}
+Server Boost Level - {guild.premium_tier}
+""",
+color=discord.Color(color),
+    )
+        embed.set_thumbnail(url=f"{guild.icon}")
+        embed.set_footer(text=footertext)
+        await ctx.send(embed=embed)
+
+@client.command()
+async def userinfo(ctx):
+    user_mentions = ctx.message.mentions  # Get mentioned users
+
+    if len(user_mentions) == 0:
+        user = ctx.author
+    else:
+        user = user_mentions[0]  # Consider only the first mentioned user
+    is_bot = "Yes" if user.bot else "No"
+    embed = discord.Embed(
+        title="User Information",
+        description=f"""
+Is Bot?: {is_bot}
+User Mention: <@{user.id}>
+User Name: {user.name}#{user.discriminator}
+User ID: {user.id}
+Display Name: {user.display_name}
+""",
+        color=discord.Color(color),
+    )
+    embed.set_footer(text=footertext)
+    embed.set_thumbnail(url=user.avatar)
+
+    await ctx.send(embed=embed)
+
 # When person joins, do... (invite tracker)
 @client.event
 async def on_member_join(member):
@@ -197,7 +291,7 @@ async def on_member_join(member):
         # Send a welcome message to the new member
         welcome_channel = member.guild.get_channel(1154658357119041596)
         if welcome_channel:
-            await welcome_channel.send(f'Welcome to our Network, {member.mention}! You were invited by {inviter.mention}.')
+            await welcome_channel.send(f'Welcome to our Network, {member.mention}! You were invited by {inviter.display_name}.')
     else:
         print(f"Couldn't find the invite code for {member.display_name}")
 
