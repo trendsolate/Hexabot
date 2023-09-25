@@ -1,4 +1,4 @@
-import discord, time, platform, asyncio, os, TOKEN
+import discord, time, platform, asyncio, os, TOKEN, json, requests
 from discord import app_commands
 from discord.ext import commands, tasks
 from itertools import cycle
@@ -8,6 +8,19 @@ from config import PREFIX, color, footertext, devs, helpMenu
 
 intents = discord.Intents.all()
 intents.message_content = True
+
+def saveHasTicket(data):
+    filename = "user_tickets.json"
+    with open(filename, 'w') as file:
+        json.dump(data, file, indent=4)
+
+def loadHasTicket():
+    filename = "user_tickets.json"
+    try:
+        with open(filename, 'r') as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {"users_with_tickets": {}}
 
 # Change prefix in config.py
 client = commands.Bot(command_prefix=PREFIX , intents=intents, help_command=None) # Help command is custom
@@ -32,13 +45,12 @@ async def on_ready():
     except Exception as e:
         print(e) 
     client.add_view(Verification())
-
 # This is the code for commands
 @client.command()
 async def help(ctx):
     args = ctx.message.content.split()
     if len(args) < 2:
-        await ctx.send('Specify a help menu category to view, `mod` for Moderation and Administration, or `gen` for General Commands or `utility` for Utility commands or`all` for All Commands.')
+        await ctx.send('Specify a help menu category to view, `mod` for Moderation and Administration, or `gen` for General Commands or `utility` for Utility Commands or `fun` for fun commands.')
     else:
         menu = args[1]
         if menu == 'all':
@@ -53,6 +65,15 @@ async def help(ctx):
         elif menu == 'utility':
             embed = discord.Embed(title="Utility", description=helpMenu.utils, color=discord.Color(color))
             await ctx.send(embed=embed)
+        elif menu == 'fun':
+            embed = discord.Embed(title="Fun", description=helpMenu.fun, color=discord.Color(color))
+            await ctx.send(embed=embed)
+        elif menu == 'dev':
+            if ctx.author.id not in devs:
+                await ctx.send('Invalid category.')
+            else:
+                embed = discord.Embed(title="Developer-Only", description=helpMenu.dev, color=discord.Color(color))
+                await ctx.send(embed=embed)
         else:
             await ctx.send('Invalid category.')
 
@@ -155,7 +176,7 @@ I'm Hexa, Your All-in-one moderator bot, I'll keep your server clean of spammers
 
 Important links:
 [Invite link](<https://discord.gg/6g6862qDnn>)
-[Bot website](<https://pornhub.com>)
+[Bot website](<https://example.com>)
 
 Developers:
 
@@ -171,12 +192,10 @@ Bunkiyiester
 Crystal
 ex6tic.js
 rahil_salecha
-
-**Made by the HEX Network**
 """,
     color=discord.Color(color)
     )
-    embed.set_footer(icon_url='https://i.imgur.com/i6gXIin.png', text="Made with Pycord")
+    embed.set_footer(icon_url='https://images-ext-1.discordapp.net/external/GqUszJ95QLfyR6y9lIRQsiXgd8JDQhC_7PDnmYo_oa4/%3Fsize%3D1024/https/cdn.discordapp.com/icons/1134337027278643333/d16fa877a398f2f2071fb04c4a4d8f2c.png', text="Made by The HEX Network")
     await ctx.send(embed=embed)
 
 @client.command()
@@ -277,6 +296,81 @@ Display Name: {user.display_name}
 
     await ctx.send(embed=embed)
 
+@client.command()
+async def ticket(ctx):
+    args = ctx.message.content.split()
+    if len(args) < 2:
+        await ctx.send(f"Usage: {PREFIX}ticket add / remove")
+        return
+
+    if args[1] == 'add':
+        author_id = ctx.author.id
+        user_data = loadHasTicket()
+
+        if user_data["users_with_tickets"].get(str(author_id)):  # Convert author_id to string
+            await ctx.send("You already have a ticket.")
+        else:
+            user_data["users_with_tickets"][str(author_id)] = True  # Store True
+            saveHasTicket(user_data)
+            await ctx.send("Ticket created.")
+            guild = ctx.guild
+            await guild.create_text_channel(f"ticket-{ctx.author.name}")
+
+    elif args[1] == 'remove':
+        author_id = ctx.author.id
+        user_data = loadHasTicket()
+
+        author_id_int = int(author_id)  # Convert author_id to an integer
+
+        if user_data["users_with_tickets"].get(str(author_id_int)):  # Convert author_id_int to string
+            user_data["users_with_tickets"].pop(str(author_id_int))
+            saveHasTicket(user_data)
+
+            # Find the channel associated with the user's ticket
+            for channel in ctx.guild.channels:
+                if channel.name.startswith(f"ticket-{ctx.author.name}"):
+                    try:
+                        await channel.delete()
+                        await channel.send("Ticket removed.")
+                        await ctx.message.delete()
+                        return
+                    except discord.errors.NotFound:
+                        print("Ticket channel not found.")
+            await ctx.send("Ticket removed.")
+        else:
+            await ctx.send("You don't have a ticket to remove.")
+
+    else:
+        await ctx.send("Invalid option.")
+
+@client.command()
+async def dog(ctx):
+    url = "https://dog.ceo/api/breeds/image/random"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        image_url = data["message"]
+        embed = discord.Embed(title="A dog for you!", color=discord.Color(color))
+        embed.set_image(url=image_url)
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send(f"Error Code: {response.status_code}")
+
+@client.command()
+async def cat(ctx):
+    url = "https://api.thecatapi.com/v1/images/search"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()[0]
+        image_url = data["url"]
+        embed = discord.Embed(title="A cat for you!", color=discord.Color(color))
+        embed.set_image(url=image_url)
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send(f"Error code: {response.status_code}")
+
+
+# Define your loadHasTicket and saveHasTicket functions here
 # When person joins, do... (invite tracker)
 @client.event
 async def on_member_join(member):
@@ -307,7 +401,6 @@ async def on_member_join(member):
             await welcome_channel.send(embed=welcome_embed, file=welcome_banner)
     else:
         print(f"Couldn't find the invite code for {member.mention}")
-
 # Do not add commands here, add commands above this part (above On member join)
 
 # Run the bot using the provided token
