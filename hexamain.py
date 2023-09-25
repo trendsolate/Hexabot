@@ -288,12 +288,25 @@ async def on_member_join(member):
 
     if invite_code:
         inviter = invite_code.inviter
-        # Send a welcome message to the new member
+        # Send an invite tracker message in the specified channel
+        invite_tracker_channel = member.guild.get_channel(1143147859789754440)
+        if invite_tracker_channel:
+            await invite_tracker_channel.send(f"{member.mention} was invited by {inviter.display_name}.")
+
+        # Send a welcome message with a banner in the specified channel
         welcome_channel = member.guild.get_channel(1154658357119041596)
         if welcome_channel:
-            await welcome_channel.send(f'Welcome to our Network, {member.mention}! You were invited by {inviter.display_name}.')
+            # banner code
+            welcome_banner = discord.File("hexbanner.hexbanner.png")
+            welcome_embed = discord.Embed(
+                title=f"Welcome to our network, {member.mention}!, you did the best thing you've ever done now",
+                description=f"You were invited by {inviter.display_name}.",
+                color=0x00ff00
+            )
+            welcome_embed.set_thumbnail(url=member.avatar)
+            await welcome_channel.send(embed=welcome_embed, file=welcome_banner)
     else:
-        print(f"Couldn't find the invite code for {member.display_name}")
+        print(f"Couldn't find the invite code for {member.mention}")
 
 # Do not add commands here, add commands above this part (above On member join)
 
