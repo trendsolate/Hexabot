@@ -1,10 +1,10 @@
-import discord, time, platform, asyncio, os, TOKEN, json, requests
+import discord, time, platform, asyncio, os, TOKEN, json, requests, subprocess
 from discord import app_commands
 from discord.ext import commands, tasks
 from itertools import cycle
 from colorama import Back, Fore, Style
 from TOKEN import TOKEN
-from config import PREFIX, color, footertext, devs, helpMenu
+from config import PREFIX, color, footertext, devs, helpMenu, apininja_apikey
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -23,28 +23,24 @@ def loadHasTicket():
         return {"users_with_tickets": {}}
 
 # Change prefix in config.py
-client = commands.Bot(command_prefix=PREFIX , intents=intents, help_command=None) # Help command is custom
-bot_status = cycle([f"Made by Trendsolate", "From The HEX Network", f"Ready to help '{PREFIX}'", "Reading a book", "Waiting for requests", "Playing Fortnite"])
+client = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None)  # Help command is custom
+bot_status = cycle([f"Made by The HEX Network", f"My prefix is {PREFIX}", "No Homo", "Fortnite"])
 
 # Continuously changes presence activity every 30 seconds to the ones in bot_status
 @tasks.loop(seconds=30)
 async def change_status():
     await client.change_presence(activity=discord.Game(next(bot_status)))
 
-#
 @client.event
 async def on_ready():
     # this runs when the account is logged into.
     prfx = (Back.BLACK + Fore.GREEN + time.strftime("%H:%M:%S UTC", time.gmtime()) + Back.RESET + Fore.WHITE + Style.BRIGHT)
     print(Fore.GREEN + f"🚀 Logged in as {client.user} | HexaBot" + Style.RESET_ALL)
+    # Start changing statues every 30 seconds.
     change_status.start()
-    try:
-        synced = await client.tree.sync()
-        print(f"Synced {len(synced)} command(s)")
-
-    except Exception as e:
-        print(e) 
+    # Add a view that listens for the button press 'Verification'
     client.add_view(Verification())
+
 # This is the code for commands
 @client.command()
 async def help(ctx):
@@ -83,12 +79,12 @@ async def ping(ctx):
     await asyncio.sleep(1)
     await og_msg.edit(content=f"Pong! {round(client.latency * 1000)}ms")
 
-
 # !! DO NOT TOUCH !! THIS IS CODE FOR VERIFICATION
 
 class Verification(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout = None)
+        super().__init__(timeout=None)
+
     @discord.ui.button(label="Verify", custom_id="Verify", style=discord.ButtonStyle.success)
     async def verify(self, interaction, button):
         role = 1144021740331225098
@@ -102,7 +98,7 @@ async def verify_setup(ctx):
     embed = discord.Embed(
         title='Verification',
         description='Use the menu below to verify yourself to get access to the server! 👇✅',
-    color=discord.Color(color)
+        color=discord.Color(color)
     )
     embed.set_footer(text=f'{ctx.guild.name} • Verification')
 
@@ -124,7 +120,7 @@ async def ban(ctx, *args):
                     await member.ban()
                     embed = discord.Embed(
                         description=f"<@{user_id}> ({member.display_name}) has been **banned** from the server.",
-                    color=discord.Color(color)
+                        color=discord.Color(color)
                     )
                     embed.set_footer(text=f'Run by {ctx.author.name} | {footertext}')
                     await ctx.send(embed=embed)
@@ -154,7 +150,7 @@ async def kick(ctx, *args):
                     await member.kick()
                     embed = discord.Embed(
                         description=f"<@{user_id}> ({member.display_name}) has been **kicked** from the server.",
-                    color=discord.Color(color)
+                        color=discord.Color(color)
                     )
                     embed.set_footer(text=f'Run by {ctx.author.name} | {footertext}')
                     await ctx.send(embed=embed)
@@ -193,9 +189,9 @@ Crystal
 ex6tic.js
 rahil_salecha
 """,
-    color=discord.Color(color)
+        color=discord.Color(color)
     )
-    embed.set_footer(icon_url='https://images-ext-1.discordapp.net/external/GqUszJ95QLfyR6y9lIRQsiXgd8JDQhC_7PDnmYo_oa4/%3Fsize%3D1024/https/cdn.discordapp.com/icons/1134337027278643333/d16fa877a398f2f2071fb04c4a4d8f2c.png', text="Made by The HEX Network")
+    footertext(embed)
     await ctx.send(embed=embed)
 
 @client.command()
@@ -238,7 +234,7 @@ async def eval(ctx):
                 embed = discord.Embed(
                     title="Result of code",
                     description=f'```\n{result}\n```',
-                color=discord.Color(color)
+                    color=discord.Color(color)
                 )
                 await ctx.send(embed=embed)
             except Exception as e:
@@ -246,15 +242,15 @@ async def eval(ctx):
 
 @client.command()
 async def serverinfo(ctx):
-        guild = ctx.guild
-        # Gets emojis as formatted
-        emojis = ", ".join([str(emoji) for emoji in guild.emojis])
+    guild = ctx.guild
+    # Gets emojis as formatted
+    emojis = ", ".join([str(emoji) for emoji in guild.emojis])
 
-        # Gets roles as formatted
-        roles = ", ".join([role.mention for role in guild.roles])
-        embed = discord.Embed(
-            title="Server Information",
-            description=f"""
+    # Gets roles as formatted
+    roles = ", ".join([role.mention for role in guild.roles])
+    embed = discord.Embed(
+        title="Server Information",
+        description=f"""
 ```Main Info```
 Guild is {guild}
 Server ID - {guild.id}
@@ -265,11 +261,11 @@ Server Member Count - {str(guild.member_count)}
 Server Boost Count - {int(guild.premium_subscription_count)}
 Server Boost Level - {guild.premium_tier}
 """,
-color=discord.Color(color),
+        color=discord.Color(color),
     )
-        embed.set_thumbnail(url=f"{guild.icon}")
-        embed.set_footer(text=footertext)
-        await ctx.send(embed=embed)
+    embed.set_thumbnail(url=f"{guild.icon}")
+    embed.set_footer(text=footertext)
+    await ctx.send(embed=embed)
 
 @client.command()
 async def userinfo(ctx):
@@ -369,9 +365,80 @@ async def cat(ctx):
     else:
         await ctx.send(f"Error code: {response.status_code}")
 
+@client.command()
+async def gif(ctx):
+    args = ctx.message.content.split()
+    if len(args) < 2:
+        await ctx.send(f"Usage: {PREFIX}gif [tag]")
+        return
+    else:
+        tag = args[1]
+        async def fetch_gif_with_tag(tag):
+            url = f'https://api.giphy.com/v1/gifs/random?api_key=WQDPAtVu7Eno2PmZLIkhQre0lTLkiuIn&tag={tag}'
+            try:
+                response = requests.get(url)
+                response.raise_for_status()  # Raise an exception for HTTP errors
+                data = response.json()
+                if 'data' in data and 'images' in data['data'] and 'original' in data['data']['images']:
+                    gif_url = data['data']['images']['original']['url']
+                    return gif_url
+                else:
+                    print("Error parsing API response: 'image_original_url' key not found.")
+                    return None
+            except requests.exceptions.RequestException as e:
+                print("Error while fetching GIF from Giphy API:", e)
+                return None
+            except KeyError as e:
+                print("Error parsing API response:", e)
+                return None
+        gif_url = await fetch_gif_with_tag(tag)
+        if gif_url:
+            embed = discord.Embed(
+                title=f"Tag is `{tag}`",
+                color=discord.Color(color)
+            )
+            embed.set_footer(text=f"Powered by GIPHY®")
+            embed.set_image(url=gif_url)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("Oops, something went wrong while fetching the GIF.", delete_after=5)
+@client.command()
+async def dadjoke(ctx):
+    output = subprocess.check_output('curl -H "Accept: text/plain" https://icanhazdadjoke.com/', shell=True, text=True)
+    ogmsg = await ctx.send("Fetching dad joke.")
+    embed = discord.Embed(
+        title="Dad Joke",
+        description=output,
+    color=discord.Color(color)
+    )
+    await ogmsg.edit(embed=embed, content=None)
 
-# Define your loadHasTicket and saveHasTicket functions here
-# When person joins, do... (invite tracker)
+@client.command()
+async def weather(ctx):
+    args = ctx.message.content.split()
+    if len(args) < 2:
+        await ctx.send("Specify a city.")
+    else:
+        ogmsg = await ctx.send("Fetching weather data...")
+        city = args[1]
+        api_url = f'https://api.api-ninjas.com/v1/weather?city={city}'
+        response = requests.get(api_url, headers={'X-Api-Key': f'{apininja_apikey}'})
+        if response.status_code == requests.codes.ok:
+            try:
+                data = response.json()
+                temp = data['temp']
+                feels_like = data['feels_like']
+                humidity = data['humidity']
+                mint = data['min_temp']
+                maxt = data['max_temp']
+
+                embed = discord.Embed(title=f"Weather data of {city}", description=f"Temperature - {temp}°C | Feels like - {feels_like}°C | Humidity - {humidity}% | Minimum Temperature - {mint}°C | Max Temperature - {maxt}°C", color=discord.Color(color))
+                await ogmsg.edit(content=None, embed=embed)
+            except Exception as e:
+                await ctx.send("An error occurred.")
+                print(e)
+        else:
+            await ctx.send("Error:", response.status_code, response.text)
 @client.event
 async def on_member_join(member):
     # Check if the member was invited and get the invite code
