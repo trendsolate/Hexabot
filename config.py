@@ -11,8 +11,9 @@ devs = [
     739548321336787247, # V1nSmoker
 ]
 
-footertext = f'Hexabot - The HEX Network'
-
+def footertext(embedvariable):
+    embedvariable.set_footer(text="Made by The HEX Network", icon_url='https://images-ext-1.discordapp.net/external/GqUszJ95QLfyR6y9lIRQsiXgd8JDQhC_7PDnmYo_oa4/%3Fsize%3D1024/https/cdn.discordapp.com/icons/1134337027278643333/d16fa877a398f2f2071fb04c4a4d8f2c.png')
+apininja_apikey = '0sc8Purbv21eN84Yk7S+BA==1BsMjkMR3VsKflGV'
 class helpMenu:
     all = f'''
 Hey friend! All commands is getting phased out in favour of a more organized, shortner and concise, categorized help menu. Run `{PREFIX}help (category)` to see the specific category commands!
@@ -26,10 +27,10 @@ Hey friend! All commands is getting phased out in favour of a more organized, sh
 **{PREFIX}verify_setup**
 Sets up verification system
 
-**{PREFIX}ban @user**
+**{PREFIX}ban (@user)**
 Bans specified user
 
-**{PREFIX}kick @user**
+**{PREFIX}kick (@user)**
 Kicks specified user
 
 **{PREFIX}purge (amount)**
@@ -76,13 +77,19 @@ Returns random dog image
 
 **{PREFIX}cat**
 Returns random cat image
+
+**{PREFIX}dadjoke**
+Returns random dad joke
+
+**{PREFIX}weather (city)**
+Returns current weather in specified city (Celcius)
 '''
     dev = f'''
 ```
 [] means optional
 () means required
 ```
-**{PREFIX}eval [code]**
+**{PREFIX}eval (code)**
 Evaluates and Runs code, in simpler words, run code which you give.
 
 ***More probably not coming soon but sure I guess***
