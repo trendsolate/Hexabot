@@ -3,11 +3,18 @@ from discord import app_commands
 from discord.ext import commands, tasks
 from itertools import cycle
 from colorama import Back, Fore, Style
+from PIL import Image, ImageDraw, ImageFont # imported PIL 'pillow' here as you can see
 from TOKEN import TOKEN
 from config import PREFIX, color, footertext, devs, helpMenu, apininja_apikey
 
 intents = discord.Intents.all()
 intents.message_content = True
+
+# added this code so it's easy to access channel IDs
+INVITE_TRACKER_CHANNEL_ID = 1143147859789754440 
+WELCOME_CHANNEL_ID = 1154658357119041596
+# stopped here for now
+
 
 def saveHasTicket(data):
     filename = "user_tickets.json"
@@ -50,25 +57,25 @@ async def help(ctx):
     else:
         menu = args[1]
         if menu == 'all':
-            embed = discord.Embed(title='All commands', description=helpMenu.all, color=discord.Color(color))
+            embed = discord.Embed(title='All commands', description=helpMenu.all, color=0x2265cb)
             await ctx.send(embed=embed)
         elif menu == 'mod':
-            embed = discord.Embed(title='Moderation and Administration', description=helpMenu.mod, color=discord.Color(color))
+            embed = discord.Embed(title='Moderation and Administration', description=helpMenu.mod, color=0x2265cb)
             await ctx.send(embed=embed)
         elif menu == 'gen':
-            embed = discord.Embed(title='General', description=helpMenu.gen, color=discord.Color(color))
+            embed = discord.Embed(title='General', description=helpMenu.gen, color=0x2265cb)
             await ctx.send(embed=embed)
         elif menu == 'utility':
-            embed = discord.Embed(title="Utility", description=helpMenu.utils, color=discord.Color(color))
+            embed = discord.Embed(title="Utility", description=helpMenu.utils, color=0x2265cb)
             await ctx.send(embed=embed)
         elif menu == 'fun':
-            embed = discord.Embed(title="Fun", description=helpMenu.fun, color=discord.Color(color))
+            embed = discord.Embed(title="Fun", description=helpMenu.fun, color=0x2265cb)
             await ctx.send(embed=embed)
         elif menu == 'dev':
             if ctx.author.id not in devs:
                 await ctx.send('Invalid category.')
             else:
-                embed = discord.Embed(title="Developer-Only", description=helpMenu.dev, color=discord.Color(color))
+                embed = discord.Embed(title="Developer-Only", description=helpMenu.dev, color=0x2265cb)
                 await ctx.send(embed=embed)
         else:
             await ctx.send('Invalid category.')
@@ -78,6 +85,48 @@ async def ping(ctx):
     og_msg = await ctx.send(f"Calculating....")
     await asyncio.sleep(1)
     await og_msg.edit(content=f"Pong! {round(client.latency * 1000)}ms")
+
+# here is the invite tracker code
+
+@client.event
+async def on_member_join(member):
+    invite_code = None
+    for invite in await member.guild.invites():
+        if invite.uses > 1:
+            invite_code = invite
+
+    if invite_code:
+        inviter = invite_code.inviter
+
+# invite tracker ends here for anyone reading, welcome messae begins
+
+        welcome_banner = Image.open("hexbanner.png")
+        banner_width, banner_height = welcome_banner.size
+        welcome_embed = discord.embed(
+            title=f"Welcome to our Network, {member.display_name}!",
+            description=f"You were invited by {inviter.mention}.",
+            color=0x2265cb
+        )
+
+        avatar = member.avatar_url_as(size=128)
+        user_avatar = Image.open(await avatar.read())
+        user_avatar = user_avatar.resize((128, 128))
+
+        avatar_x = (banner_width - user_avatar.width) // 2
+        avatar_y = (banner_height - user_avatar.height) // 2
+        
+        welcome_banner.paste(user_avatar, (avatar_x, avatar_y))
+       
+        welcome_banner.save("modified_hexbanner.png")
+
+        welcome_embed.set_image(url="attachment://modified_hexbanner.png")
+        welcome_channel = member.guild.get_channel(WELCOME_CHANNEL_ID)
+        if welcome_channel:
+            await welcome_channel.send(embed=welcome_embed, file=discord.File("hexbanner.png"))
+    else:
+        print(f"Couldn't find the invite code for {member.display_name}")
+
+# the code changed ends here
 
 # !! DO NOT TOUCH !! THIS IS CODE FOR VERIFICATION
 
@@ -98,7 +147,7 @@ async def verify_setup(ctx):
     embed = discord.Embed(
         title='Verification',
         description='Use the menu below to verify yourself to get access to the server! 👇✅',
-        color=discord.Color(color)
+        color=0x2265cb
     )
     embed.set_footer(text=f'{ctx.guild.name} • Verification')
 
@@ -120,7 +169,7 @@ async def ban(ctx, *args):
                     await member.ban()
                     embed = discord.Embed(
                         description=f"<@{user_id}> ({member.display_name}) has been **banned** from the server.",
-                        color=discord.Color(color)
+                        color=0x2265cb
                     )
                     embed.set_footer(text=f'Run by {ctx.author.name} | {footertext}')
                     await ctx.send(embed=embed)
@@ -150,7 +199,7 @@ async def kick(ctx, *args):
                     await member.kick()
                     embed = discord.Embed(
                         description=f"<@{user_id}> ({member.display_name}) has been **kicked** from the server.",
-                        color=discord.Color(color)
+                        color=0x2265cb
                     )
                     embed.set_footer(text=f'Run by {ctx.author.name} | {footertext}')
                     await ctx.send(embed=embed)
@@ -189,7 +238,7 @@ Crystal
 ex6tic.js
 rahil_salecha
 """,
-        color=discord.Color(color)
+        color=0x2265cb
     )
     footertext(embed)
     await ctx.send(embed=embed)
@@ -234,7 +283,7 @@ async def eval(ctx):
                 embed = discord.Embed(
                     title="Result of code",
                     description=f'```\n{result}\n```',
-                    color=discord.Color(color)
+                    color=0x2265cb
                 )
                 await ctx.send(embed=embed)
             except Exception as e:
@@ -261,7 +310,7 @@ Server Member Count - {str(guild.member_count)}
 Server Boost Count - {int(guild.premium_subscription_count)}
 Server Boost Level - {guild.premium_tier}
 """,
-        color=discord.Color(color),
+        color=0x2265cb,
     )
     embed.set_thumbnail(url=f"{guild.icon}")
     embed.set_footer(text=footertext)
@@ -285,7 +334,7 @@ User Name: {user.name}#{user.discriminator}
 User ID: {user.id}
 Display Name: {user.display_name}
 """,
-        color=discord.Color(color),
+        color=0x2265cb,
     )
     embed.set_footer(text=footertext)
     embed.set_thumbnail(url=user.avatar)
@@ -395,7 +444,7 @@ async def gif(ctx):
         if gif_url:
             embed = discord.Embed(
                 title=f"Tag is `{tag}`",
-                color=discord.Color(color)
+                color=0x2265cb
             )
             embed.set_footer(text=f"Powered by GIPHY®")
             embed.set_image(url=gif_url)
@@ -409,7 +458,7 @@ async def dadjoke(ctx):
     embed = discord.Embed(
         title="Dad Joke",
         description=output,
-    color=discord.Color(color)
+    color=0x2265cb
     )
     await ogmsg.edit(embed=embed, content=None)
 
@@ -439,36 +488,8 @@ async def weather(ctx):
                 print(e)
         else:
             await ctx.send("Error:", response.status_code, response.text)
-@client.event
-async def on_member_join(member):
-    # Check if the member was invited and get the invite code
-    invite_code = None
-    for invite in await member.guild.invites():
-        if invite.uses > 1:
-            invite_code = invite
 
-    if invite_code:
-        inviter = invite_code.inviter
-        # Send an invite tracker message in the specified channel
-        invite_tracker_channel = member.guild.get_channel(1143147859789754440)
-        if invite_tracker_channel:
-            await invite_tracker_channel.send(f"{member.mention} was invited by {inviter.display_name}.")
 
-        # Send a welcome message with a banner in the specified channel
-        welcome_channel = member.guild.get_channel(1154658357119041596)
-        if welcome_channel:
-            # banner code
-            welcome_banner = discord.File("hexbanner.hexbanner.png")
-            welcome_embed = discord.Embed(
-                title=f"Welcome to our network, {member.mention}!, you did the best thing you've ever done now",
-                description=f"You were invited by {inviter.display_name}.",
-                color=0x00ff00
-            )
-            welcome_embed.set_thumbnail(url=member.avatar)
-            await welcome_channel.send(embed=welcome_embed, file=welcome_banner)
-    else:
-        print(f"Couldn't find the invite code for {member.mention}")
-# Do not add commands here, add commands above this part (above On member join)
 
 # Run the bot using the provided token
 client.run(TOKEN)
