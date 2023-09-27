@@ -100,7 +100,7 @@ async def on_member_join(member):
 
 # invite tracker ends here for anyone reading, welcome messae begins
 
-        welcome_banner = Image.open("hexbanner.png")
+       welcome_banner = Image.open("hexbanner.png")
         banner_width, banner_height = welcome_banner.size
         welcome_embed = discord.Embed(
             title=f"Welcome to our Network, {member.display_name}!",
@@ -108,7 +108,7 @@ async def on_member_join(member):
             color=0x2265cb
         )
 
-        avatar = member.avatar_url_as(size=128)
+        user_avatar_url = member.avatar.url if member.avatar else member.default_avatar.url
         user_avatar = Image.open(await avatar.read())
         user_avatar = user_avatar.resize((128, 128))
 
@@ -127,7 +127,6 @@ async def on_member_join(member):
         print(f"Couldn't find the invite code for {member.display_name}")
 
 # the code changed ends here
-
 # !! DO NOT TOUCH !! THIS IS CODE FOR VERIFICATION
 
 class Verification(discord.ui.View):
