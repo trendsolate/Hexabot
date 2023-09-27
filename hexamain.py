@@ -102,7 +102,7 @@ async def on_member_join(member):
 
         welcome_banner = Image.open("hexbanner.png")
         banner_width, banner_height = welcome_banner.size
-        welcome_embed = discord.embed(
+        welcome_embed = discord.Embed(
             title=f"Welcome to our Network, {member.display_name}!",
             description=f"You were invited by {inviter.mention}.",
             color=0x2265cb
