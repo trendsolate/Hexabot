@@ -488,7 +488,7 @@ async def weather(ctx):
         else:
             await ctx.send("Error:", response.status_code, response.text)
 
-@client.hybrid_command()
+@client.hybrid_command(name="ping", description="Shows the bot's latency")
 async def ping(ctx):
     await ctx.send("Pong!" + str(round(client.latency * 1000)) + "ms")
 
