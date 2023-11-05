@@ -492,5 +492,9 @@ async def weather(ctx):
 async def ping(ctx):
     await ctx.send("Pong!" + str(round(client.latency * 1000)) + "ms")
 
+@client.hybrid_command()
+async def invite(ctx):
+    await ctx.send("Invite me to your server! https://discord.com/api/oauth2/authorize?client_id=879187517896747294&permissions=8&scope=bot%20applications.commands")
+
 # Run the bot using the provided token
 client.run(TOKEN)
