@@ -15,7 +15,7 @@ cd luio
 git clone https://github.com/trendsolate/Hexabot.git .
 ```
 Step 3. Run this command to make the directory structure
-```
+```console
 mkdir db
 cd db
 type nul > serversettings.sqlite3
