@@ -2,9 +2,37 @@
 The best bot.
 
 # Installation Instructions
-## Let's assume you're on Windows, be real only noerlol (me) uses linux...
+## Windows (x64)
+Open command prompt and...<br>
+Step 1. Install git using `winget`
+```console
+winget install git
+```
+Step 2. Git clone this repository
+```console
+mkdir luio
+cd luio
+git clone https://github.com/trendsolate/Hexabot.git .
+```
+Step 3. Run this command to make the directory structure
+```
+mkdir db
+cd db
+type nul > serversettings.sqlite3
+type nul > economy.sqlite3
+type nul > warns.sqlite3
+cd ..
+```
 
-Step 1. Clone repo to local device.<br>
-Step 2. Make a folder: `db`<br>
-Step 3. Make two files: `genconf.sqlite3` and `warns.sqlite3`<br>
-Step 4. Open command prompt, cd to the place where you have done all of this and the bot.py files are and run `python bot.py`
+# Running the bot
+## Windows
+Run this command.<br>
+```console
+python bot.py
+```
+Make sure you have Python installed.<br>
+## Linux and macOS
+```console
+python3 bot.py
+```
+Make sure you have Python installed <br>
