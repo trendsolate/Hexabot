@@ -26,12 +26,14 @@ cd ..
 
 # Running the bot
 ## Windows
+\* Make sure you are in the same directory as the bot before running the command
 Run this command.<br>
 ```console
 python bot.py
 ```
 Make sure you have Python installed.<br>
 ## Linux and macOS
+\* Make sure you are in the same directory as the bot before running the command
 ```console
 python3 bot.py
 ```
